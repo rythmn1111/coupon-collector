@@ -1,0 +1,64 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// First, let's define our enum types for roles since they have specific allowed values
+enum BuyerRole {
+  p1
+  p2
+  p3
+}
+
+enum SellerRole {
+  admin
+  p1
+  p2
+  p3
+}
+
+// Now let's create our models (tables)
+model User {
+  id            Int      @id @default(autoincrement())
+  name         String    @db.VarChar(50) // Name can be up to 50 characters
+  buyerRole     BuyerRole
+  totalReward  Float    @default(0)
+  // Relationships
+  sales         Sales[]              // One user can have many sales
+  sellingBalance UserSellingBalance? // One user has one selling balance
+  phoneNumber String @db.VarChar(10)  // Required 10-digit phone number
+  gstNumber   String? @db.VarChar(15) // Optional GST number, can be null
+}
+
+model Sales {
+  id                        Int        @id
+  productNamesWithQuantity Json     // Prisma supports JSON fields
+  totalPrice                Float
+  sellerRole                 SellerRole
+  sellerId                   Int
+  // Relationship with User
+  user                      User       @relation(fields: [id], references: [id])
+}
+
+model UserSellingBalance {
+  id     Int  @id
+  stock  Json // This will store your object like { foo: 2, bar: 34 }
+  // Relationship with User
+  user   User @relation(fields: [id], references: [id])
+}
+
+model Products {
+  id           Int      @id @default(autoincrement())
+  productName String   @unique  // Making it unique to prevent duplicate products
+  price        Float
+}
