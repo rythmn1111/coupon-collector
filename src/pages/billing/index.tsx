@@ -27,7 +27,7 @@ export default function Billing() {
         </AlertDialogTrigger>
         <AlertDialogContent className="bg-black-600">
         <AlertDialogAction className="bg-slate-50 hover:bg-slate-400 text-black" onClick={()=>{router.push('/billing/new_bill')}}>Existing User</AlertDialogAction>
-        <AlertDialogAction className="bg-slate-50 hover:bg-slate-400 text-black" >Create New User</AlertDialogAction>
+        <AlertDialogAction className="bg-slate-50 hover:bg-slate-400 text-black" onClick={()=>{router.push('/billing/onboarding')}}>Create New User</AlertDialogAction>
         <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
         </AlertDialogFooter>
