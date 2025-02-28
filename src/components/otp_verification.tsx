@@ -58,7 +58,14 @@ export default function OtpVerification({ phoneNumber, userData, onSuccess }: Ot
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(userData),
+                body: JSON.stringify({
+                    name: userData.name,
+                    email: userData.email || '',
+                    phoneNumber: userData.phoneNumber,
+                    gstNumber: userData.gstNumber || null,
+                    aadharCard: userData.aadharCard || null,
+                    panCard: userData.panCard || null
+                }),
             });
             
             const saveData = await saveResponse.json();

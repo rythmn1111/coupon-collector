@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
-//   FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -13,6 +12,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
+import OtpVerification from "../../components/otp_verification"; // We'll create this component
 
 const formSchema = z.object({
     name: z.string().nonempty(),
@@ -22,8 +22,8 @@ const formSchema = z.object({
         /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/,
         "Invalid GSTIN format. Must be 15 characters in the correct format"
       ).optional(),
-      aadharCard: z.string().regex(/^[0-9]{12}$/, "Aadhar card must be exactly 12 digits").optional(),
-      panCard: z.string().regex(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, "PAN card must be exactly 10 characters").optional(),
+    aadharCard: z.string().regex(/^[0-9]{12}$/, "Aadhar card must be exactly 12 digits").optional(),
+    panCard: z.string().regex(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, "PAN card must be exactly 10 characters").optional(),
 });
 
 export default function Onboarding() {
@@ -31,50 +31,92 @@ export default function Onboarding() {
         resolver: zodResolver(formSchema),
         defaultValues: {
             name: "",
-            // email: "",
             phoneNumber: "",
-            // gstNumber: "",
-            // aadharCard: "",
+            gstNumber: "",
         },
     });
-    const [response, setResponse] = useState<z.infer<typeof formSchema>>({
-        name: "",
-        phoneNumber: "",
-        gstNumber: "",
-        // email: "",
-        // aadharCard: "",
-    });
-    function onSubmit(values: z.infer<typeof formSchema>) {
-        // Handle form submission
-        console.log(values);
-        setResponse(values);
-
+    
+    const [userData, setUserData] = useState<z.infer<typeof formSchema> | null>(null);
+    const [showOtpVerification, setShowOtpVerification] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    
+    async function onSubmit(values: z.infer<typeof formSchema>) {
+        setIsLoading(true);
+        setError(null);
+        
+        try {
+            // Request OTP from your backend
+            const response = await fetch('http://localhost:3001/auth/create_otp', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ phoneNumber: values.phoneNumber }),
+            });
+            
+            const data = await response.json();
+            
+            if (!response.ok) {
+                throw new Error(data.message || 'Failed to send OTP');
+            }
+            
+            // Store user data and show OTP verification screen
+            setUserData(values);
+            setShowOtpVerification(true);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Something went wrong');
+        } finally {
+            setIsLoading(false);
+        }
     }
     
+    // Function to handle successful OTP verification
+    const handleOtpSuccess = () => {
+        // Redirect or show success message
+        alert("Verification successful! User data has been saved.");
+        // You might want to redirect to another page or show a success component
+    };
 
-    return <>
-    <div className="h-20 bg-orange-600 flex justify-center items-center">
-            <h1 className="text-white font-bold font-mono text-5xl">Onboarding</h1>
-    </div>
-    <div className="mt-4 mins-h-screen bg-black flex flex-col gap-5">
-        
-        <div className="flex justify-center items-center flex-col gap-5">
-            <div className="w-96 bg-white p-6 rounded-lg">
-                <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                        <FormField
-                            control={form.control}
-                            name="name"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel className="text-black">Name</FormLabel>
-                                    <FormControl>
-                                        <Input placeholder="Enter your name" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
+    if (showOtpVerification && userData) {
+        return (
+            <OtpVerification 
+                phoneNumber={userData.phoneNumber} 
+                userData={userData}
+                onSuccess={handleOtpSuccess}
+            />
+        );
+    }
+
+    return (
+        <>
+        <div className="h-20 bg-orange-600 flex justify-center items-center">
+                <h1 className="text-white font-bold font-mono text-5xl">Onboarding</h1>
+        </div>
+        <div className="mt-4 mins-h-screen bg-black flex flex-col gap-5">
+            
+            <div className="flex justify-center items-center flex-col gap-5">
+                <div className="w-96 bg-white p-6 rounded-lg">
+                    {error && <div className="p-3 bg-red-100 text-red-700 rounded mb-4">{error}</div>}
+                    
+                    <Form {...form}>
+                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                            <FormField
+                                control={form.control}
+                                name="name"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel className="text-black">Name</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="Enter your name" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            
+                            {/* Other form fields here... */}
+                            
                         
                         <FormField
                             control={form.control}
@@ -144,19 +186,21 @@ export default function Onboarding() {
                                 </FormItem>
                             )}
                         />
-                        
-                        <Button type="submit" className="w-full bg-orange-600 hover:bg-orange-700">
-                            <p className="text-2xl text-white font-mono">
-                                Generate OTP
+                            
+                            <Button 
+                                type="submit" 
+                                className="w-full bg-orange-600 hover:bg-orange-700"
+                                disabled={isLoading}
+                            >
+                                <p className="text-2xl text-white font-mono">
+                                    {isLoading ? "Sending..." : "Generate OTP"}
                                 </p>
-                        </Button>
-                    </form>
-                </Form>
+                            </Button>
+                        </form>
+                    </Form>
+                </div>
             </div>
         </div>
-        <div>
-            <pre>{JSON.stringify(response, null, 2)}</pre>
-        </div>
-    </div>
-    </>
+        </>
+    );
 }

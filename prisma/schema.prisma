@@ -38,6 +38,9 @@ model User {
   sellingBalance UserSellingBalance? // One user has one selling balance
   phoneNumber String @db.VarChar(10)  // Required 10-digit phone number
   gstNumber   String? @db.VarChar(15) // Optional GST number, can be null
+  adharNumber String? @db.VarChar(12)  // Required 12-digit Aadhar number
+  panNumber   String? @db.VarChar(10)  // Required 10-digit PAN number
+  email       String
 }
 
 model Sales {
