@@ -31,6 +31,6 @@ const myFont = localFont({
 
 export default function App({ Component, pageProps }: AppProps) {
   return <main className={`${myFont.className} ${myFont.variable}`}>
-    <Component {...pageProps} />;
+    <Component {...pageProps} />
   </main>
 }
