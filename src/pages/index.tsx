@@ -9,7 +9,9 @@ export default function Home() {
             <h1 className="text-white font-bold font-degular font-black text-5xl">God Mode</h1>
         </div>
         <div className="h-[calc(100vh-8rem)] flex justify-center items-center  flex-col gap-5">
-        <Button className="bg-orange-800 hover:bg-orange-600 font-mono text-white text-3xl px-10 py-14 w-[300px]">Admin Panel</Button>
+        <Button className="bg-orange-800 hover:bg-orange-600 font-mono text-white text-3xl px-10 py-14 w-[300px]" onClick={()=>{
+  router.push('/admin')
+}}>Admin Panel</Button>
 <Button className="bg-orange-800 hover:bg-orange-600 text-white font-mono text-3xl px-10 py-14 w-[300px]" onClick={()=>{
   router.push('/billing')
 }}>Billing Panel

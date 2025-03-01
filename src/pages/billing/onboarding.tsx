@@ -13,6 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import OtpVerification from "../../components/otp_verification"; // We'll create this component
+import { useRouter } from "next/router";
 
 const formSchema = z.object({
     name: z.string().nonempty(),
@@ -27,6 +28,7 @@ const formSchema = z.object({
 });
 
 export default function Onboarding() {
+    const router = useRouter();
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -46,8 +48,30 @@ export default function Onboarding() {
         setError(null);
         
         try {
-            // Request OTP from your backend
-            const response = await fetch('http://localhost:3001/auth/create_otp', {
+            // Check if user exists
+            const checkResponse = await fetch('/api/checkuser', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    phoneNumber: values.phoneNumber,
+                }),
+            });
+    
+            if (!checkResponse.ok) {
+                throw new Error('Failed to check phone number');
+            }
+    
+            const checkData = await checkResponse.json();
+            
+            if (checkData.exists) {
+                setError("Phone number already exists");
+                return;
+            }
+            
+            // Request OTP if user doesn't exist
+            const otpResponse = await fetch('http://localhost:3001/auth/create_otp', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -55,11 +79,12 @@ export default function Onboarding() {
                 body: JSON.stringify({ phoneNumber: values.phoneNumber }),
             });
             
-            const data = await response.json();
-            
-            if (!response.ok) {
-                throw new Error(data.message || 'Failed to send OTP');
+            if (!otpResponse.ok) {
+                const errorData = await otpResponse.json();
+                throw new Error(errorData.message || 'Failed to send OTP');
             }
+            
+            // const otpData = await otpResponse.json();
             
             // Store user data and show OTP verification screen
             setUserData(values);
@@ -76,6 +101,7 @@ export default function Onboarding() {
         // Redirect or show success message
         alert("Verification successful! User data has been saved.");
         // You might want to redirect to another page or show a success component
+        router.push("/billing/new_bill");
     };
 
     if (showOtpVerification && userData) {
