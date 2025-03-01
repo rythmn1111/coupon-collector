@@ -1,6 +1,7 @@
 import "@/styles/globals.css";
 import type { AppProps } from "next/app";
 import localFont from 'next/font/local'
+import { Toaster } from "@/components/ui/sonner"
 
 const myFont = localFont({
   src: [
@@ -32,5 +33,6 @@ const myFont = localFont({
 export default function App({ Component, pageProps }: AppProps) {
   return <main className={`${myFont.className} ${myFont.variable}`}>
     <Component {...pageProps} />
+    <Toaster />
   </main>
 }

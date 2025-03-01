@@ -53,6 +53,17 @@ model adminSales{
   buyerRole BuyerRole
 }
 
+model transferSale{
+  id Int @id @default(autoincrement())
+  sellerId Int
+  buyerId Int
+  productNamesWithQuantity Json
+  totalPrice Float
+  sellerRole SellerRole
+  buyerRole BuyerRole
+  
+}
+
 // model Sales {
 //   id                        Int        @id @default(autoincrement())
 //   productNamesWithQuantity  Json     // Prisma supports JSON fields

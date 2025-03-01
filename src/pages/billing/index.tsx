@@ -33,7 +33,7 @@ export default function Billing() {
         </AlertDialogFooter>
         </AlertDialogContent>
         </AlertDialog>
-        <Button className="bg-orange-800 hover:bg-orange-600 text-white font-mono text-3xl px-10 py-14 w-[300px]">show all bill</Button>
+        <Button className="bg-orange-800 hover:bg-orange-600 text-white font-mono text-3xl px-10 py-14 w-[300px]" onClick={()=>{router.push('/billing/all_bill')}}>show all bill</Button>
         </div>
     </div>
     </>
