@@ -64,7 +64,7 @@ export default function UserLogin() {
 
       if (response.data.success) {
         // Fetch user data from your API
-        const userResponse = await axios.get(`/api/user?phoneNumber=${phoneNumber}`);
+        const userResponse = await axios.get(`/api/users1?phoneNumber=${phoneNumber}`);
         const userData = userResponse.data;
         
         // Store user data in state and localStorage for persistence
